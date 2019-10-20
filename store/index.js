@@ -22,7 +22,9 @@ export const mutations = {
     // console.log(state.counters[index])
   },
   decrement (state, index) {
-    state.counters[index].total--
+    if (state.counters[index].total > 0) {
+      state.counters[index].total--
+    }
   },
   toggleStartTime (state) {
     state.startTime ? state.startTime = false : state.startTime = new Date()
