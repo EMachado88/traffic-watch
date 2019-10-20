@@ -4,23 +4,46 @@
     justify-center
     align-center
   >
-    <v-btn
+    <v-row
       v-for="(counter, index) in counters"
       :key="index"
-      class="pa-5 mt-8 d-flex justify-space-between display-1 font-weight-bold"
-      block
-      color="secondary"
-      x-large
-      dark
-      style="height: auto"
-      @click.end="click(counter, true)"
+      class="mt-8"
+      style="width: 100%"
     >
-      <v-icon x-large>
-        mdi-{{ counter.icon }}
-      </v-icon>
-      <span>{{ counter.name }}</span>
-      <span>{{ counter.total }}</span>
-    </v-btn>
+      <v-col
+        :cols="2"
+      >
+        <v-btn
+          class="pa-5 display-1 font-weight-bold"
+          color="error"
+          x-large
+          dark
+          style="height: auto"
+          @click.end="click(index)"
+        >
+          <v-icon x-large>
+            mdi-minus
+          </v-icon>
+        </v-btn>
+      </v-col>
+      <v-col>
+        <v-btn
+          class="pa-5 d-flex justify-space-between display-1 font-weight-bold"
+          block
+          color="primary"
+          x-large
+          dark
+          style="height: auto"
+          @click.end="click(index, true)"
+        >
+          <v-icon x-large>
+            mdi-{{ counter.icon }}
+          </v-icon>
+          <span>{{ counter.name }}</span>
+          <span>{{ counter.total }}</span>
+        </v-btn>
+      </v-col>
+    </v-row>
 
     <v-fab-transition>
       <v-btn
@@ -59,33 +82,32 @@
 
 <script>
 import { saveAs } from 'file-saver'
+import { mapMutations } from 'vuex'
 
 export default {
   data () {
     return {
-      resetSheet: false,
-      startTime: false,
-      username: 'Jules',
-      counters: [
-        {
-          name: 'Cars',
-          icon: 'car',
-          total: 0
-        },
-        {
-          name: 'Trucks',
-          icon: 'truck',
-          total: 0
-        }
-      ]
+      resetSheet: false
+    }
+  },
+  computed: {
+    counters () {
+      return this.$store.state.counters
+    },
+    startTime () {
+      return this.$store.state.startTime
+    },
+    username () {
+      return this.$store.state.username
     }
   },
   methods: {
-    click (counter, increment) {
-      if (!this.startTime) {
-        this.startTime = new Date()
+    click (index, increment) {
+      if (!this.$store.state.startTime) {
+        this.toggleStartTime()
       }
-      increment ? counter.total++ : counter.total--
+
+      increment ? this.$store.commit('increment', index) : this.$store.commit('decrement', index)
     },
     save () {
       const endTime = new Date()
@@ -129,12 +151,13 @@ End:      ${endTime.toLocaleTimeString()}
       this.resetSheet = true
     },
     reset () {
+      this.resetCounters()
       this.resetSheet = false
-      for (const counter of this.counters) {
-        counter.total = 0
-      }
-      this.startTime = false
-    }
+    },
+    ...mapMutations({
+      toggleStartTime: 'toggleStartTime',
+      resetCounters: 'resetCounters'
+    })
   }
 }
 </script>
